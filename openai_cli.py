@@ -22,7 +22,7 @@ Created on: 2024-01-10
 Copyright (c) 2024 UhuruTek Solutions
 License: MIT
 """
-
+import importlib
 import os
 import time
 from pprint import pprint
@@ -36,15 +36,16 @@ from openai_utils import show_json, datetime_str, str_to_bool
 GPT_ENV = 'openai.env'
 dotenv.load_dotenv()
 dotenv.load_dotenv(GPT_ENV)
+chatgpt = OpenAI()
 # set DEBUG=True or DEBUG=1 in shell environment or .env file
 is_debug = str_to_bool(os.environ.get('DEBUG', default=False))
-chatgpt = OpenAI()
+__version__ = importlib.metadata.version("openai-cli")
 
 
 @click.group(help='Make conversation with OpenAI models directly from command line')
+@click.version_option(__version__)
 def cli():
     """openai_cli command entry point"""
-    pass
 
 
 @cli.command(name='list', help='List messages in current or given thread')

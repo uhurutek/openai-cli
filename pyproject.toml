@@ -1,7 +1,7 @@
 # https://github.com/pypa/sampleproject/blob/main/pyproject.toml
 [project]
 name = "openai-cli"
-version = "0.1.0"
+version = "0.2.1"
 description = "Command line (CLI) application of OpenAI python client library"
 readme = "README.md"
 # TODO Tested on python 3.10.2. need to test on 3.8

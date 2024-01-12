@@ -25,8 +25,7 @@ Just run
 ```bash
 ./openai_asst.py --help
 Usage: openai_asst.py [OPTIONS] COMMAND [ARGS]...
-  Create OpenAI assistant and get details of it. Get list of assistants linked
-  to an OpenAI platform account identified by OPENAI_API_KEY.
+  Create and manage OpenAI assistant along with files from command line
 
 Commands:
   checkfile  Check file paths and their size

@@ -12,6 +12,7 @@ Created on: 2024-01-10
 Copyright (c) 2024 UhuruTek Solutions
 License: MIT
 """
+import importlib
 import os
 
 import click
@@ -26,15 +27,16 @@ dotenv.load_dotenv(GPT_ENV)
 dotenv.load_dotenv()
 chatgpt = OpenAI()
 is_debug = str_to_bool(os.environ.get('DEBUG', default=False))
+__version__ = importlib.metadata.version("openai-cli")
 
 
-@click.group(help='Create OpenAI assistant and get details of it. Get list of assistants'
-                  ' linked to an OpenAI platform account identified by OPENAI_API_KEY.')
+@click.group(help='Create and manage OpenAI assistant along with files from command line')
+@click.version_option(__version__)
 def asst():
-    pass
+    """openai_cli command entry point"""
 
 
-@asst.command(help='Create an assistant in OpenAI platform')
+@asst.command()
 @click.argument('name')
 @click.option('--model', '-m', default='gpt-3.5-turbo', show_default=True)
 @click.option('--files', '-f', required=False, multiple=True,
