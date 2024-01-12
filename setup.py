@@ -1,3 +1,4 @@
+# https://github.com/pypa/sampleproject/blob/db5806e0a3204034c51b1c00dde7d5eb3fa2532e/setup.py
 from setuptools import setup
 
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -13,11 +14,13 @@ setup(
     author_email='imtiaz.rahi@gmail.com',
     description='Command line (CLI) application of OpenAI python client library',
     long_description=long_description,
+    long_description_content_type="text/markdown",
+    keywords="openai, cli, command-line",
     project_urls={
         "Bug Reports": "https://github.com/uhurutek/openai-cli/issues",
         "Source": "https://github.com/uhurutek/openai-cli",
     },
-    classifiers = [
+    classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
@@ -38,6 +41,10 @@ setup(
         "Topic :: Utilities",
     ],
     python_requires=">=3.7",
-    package_dir={""},
-    install_requires=["python-dotenv", "click", "openai",],
+    install_requires=["python-dotenv", "click", "openai", ],
+    entry_points='''
+    [console_scripts]
+    openai-asst=openai_asst:main
+    openai-cli=openai_cli:main
+    '''
 )

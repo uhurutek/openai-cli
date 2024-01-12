@@ -1,6 +1,8 @@
 # openai-cli
 Command line (CLI) application of OpenAI python client library
 
+![GitHub License](https://img.shields.io/github/license/uhurutek/openai-cli)
+
 ## Setup
 
 1. Create a virtual environment and activate it (this part can be skipped):
