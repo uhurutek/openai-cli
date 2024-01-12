@@ -76,7 +76,6 @@ target/
 
 # Django 
 *.log
-*.pot
 *.pyc
 db.sqlite3
 db.sqlite3-journal
@@ -126,13 +125,6 @@ ipython_config.py
 #   https://pdm.fming.dev/#use-with-ide
 .pdm.toml
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
 # SageMath parsed files
 *.sage.py
 
@@ -142,8 +134,7 @@ celerybeat.pid
 env/
 venv/
 ENV/
-env.bak/
-venv.bak/
+venv.*
 
 .vscode
 

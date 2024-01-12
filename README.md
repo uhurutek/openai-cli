@@ -29,7 +29,7 @@ Usage: openai_asst.py [OPTIONS] COMMAND [ARGS]...
 Commands:
   checkfile  Check file paths and their size
   create     Create an assistant in OpenAI platform
-  file       Provide file(s) to save in OpenAI platform to use with assistants
+  file       Create files in OpenAI platform to use with assistants
   info       Get detailed information about a particular assistant
   list       List assistants linked with OpenAI platform account
    ```

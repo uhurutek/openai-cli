@@ -13,7 +13,6 @@ Copyright (c) 2024 UhuruTek Solutions
 License: MIT
 """
 import os
-from pprint import pprint
 
 import click
 import dotenv
@@ -22,8 +21,9 @@ from openai import OpenAI
 from openai_utils import show_json, bytes_to_human_readable, str_to_bool
 
 GPT_ENV = 'openai.env'
-dotenv.load_dotenv()
+# Sequence matters. GPT_ENV must be loaded first
 dotenv.load_dotenv(GPT_ENV)
+dotenv.load_dotenv()
 chatgpt = OpenAI()
 is_debug = str_to_bool(os.environ.get('DEBUG', default=False))
 
@@ -42,6 +42,7 @@ def asst():
 @click.option('--file_ids', required=False, type=str,
               help='Provide comma separated id of files previously uploaded to OpenAI platform')
 def create(**kwargs):
+    """Create an assistant in OpenAI platform"""
     if is_debug:
         print(f"Instructions: {os.environ.get('ASST_INSTRUCTION')}")
     instruct = os.environ.get('ASST_INSTRUCTION').strip()
@@ -79,6 +80,7 @@ def create(**kwargs):
 
 
 def process_files(file_objs) -> list[str]:
+    """Upload files to OpenAI"""
     files = []
     for file_path in file_objs:
         try:
@@ -88,17 +90,18 @@ def process_files(file_objs) -> list[str]:
                 if is_debug:
                     show_json(res)
                 print(f'File: {res.id} was created of {bytes_to_human_readable(res.bytes)} bytes')
-        except Exception as e:
-            print(f"Error uploading file to OpenAI platform: {str(e)}")
+        except OSError as err:
+            print(f"Error uploading file to OpenAI platform: {str(err)}")
     if is_debug:
         print(f'Files have been created in OpenAI platform {files}')
     return files
 
 
-@asst.command(help='Provide file(s) to save in OpenAI platform to use with assistants')
+@asst.command(help='Create files in OpenAI platform to use with assistants')
 # Can provide multiple file(s) separate by space. Max 20 file per assistant as per OpenAI rule
 @click.argument('files', type=click.Path(exists=True), nargs=-1)
 def file(**kwargs) -> list[str]:
+    """Create files in OpenAI platform to use with assistants"""
     files = kwargs['files']
     if not files:
         print('No files given')
@@ -111,6 +114,7 @@ def file(**kwargs) -> list[str]:
 
 
 def asst_tools():
+    """Load assistant tools params from env and return them"""
     tools = []
     is_interpret = str_to_bool(os.environ.get('ASST_CODE_INTERPRETER', default=True))
     is_retrieval = str_to_bool(os.environ.get('ASST_RETRIEVAL', default=False))
@@ -126,7 +130,7 @@ def asst_tools():
 def info(**kwargs):
     """Get detailed information about a particular assistant"""
     asst_id = kwargs['id'] if kwargs['id'] else os.environ.get("ASSISTANT_ID")
-    if asst_id == None:
+    if asst_id is None:
         print('Assistant id must be given as argument or in .env file')
         return
     res = chatgpt.beta.assistants.retrieve(asst_id)
@@ -141,8 +145,10 @@ def alist():
 
 
 @asst.command(name='checkfile', help='Check file paths and their size')
-@click.argument('files', type=click.Path(exists=True), nargs=-1)  # Provide file(s) separate by space
+# Provide file(s) separate by space
+@click.argument('files', type=click.Path(exists=True), nargs=-1)
 def check_file(**kwargs):
+    """Check file paths and their size"""
     for file_path in kwargs['files']:
         size = bytes_to_human_readable(os.path.getsize(file_path))
         print(f"Size of {file_path} is {size}")
