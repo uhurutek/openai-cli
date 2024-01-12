@@ -47,8 +47,10 @@ dependencies = [
 "Bug Reports" = "https://github.com/uhurutek/openai-cli/issues"
 "Source" = "https://github.com/uhurutek/openai-cli"
 [project.scripts]
-openai-asst = "openai_asst:main"
-openai-cli = "openai_cli:main"
+openai-asst = "openai_asst:asst"
+openai-cli = "openai_cli:cli"
 [build-system]
 requires = ["setuptools>=43.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
+[tool.setuptools]
+packages = ["openai_asst", "openai_cli"]
