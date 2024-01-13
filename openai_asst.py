@@ -19,7 +19,8 @@ import click
 import dotenv
 from openai import OpenAI
 
-from openai_utils import show_json, bytes_to_human_readable, str_to_bool
+from openai_utils import (show_json, bytes_to_human_readable,
+                          str_to_bool, epoch_to_localtime)
 
 GPT_ENV = 'openai.env'
 # Sequence matters. GPT_ENV must be loaded first
@@ -128,22 +129,37 @@ def asst_tools():
 
 
 @asst.command(help='Get detailed information about a particular assistant')
-@click.argument('id', required=False)
+@click.argument('id', required=False, default=os.environ.get("ASSISTANT_ID"))
 def info(**kwargs):
     """Get detailed information about a particular assistant"""
-    asst_id = kwargs['id'] if kwargs['id'] else os.environ.get("ASSISTANT_ID")
+    asst_id = kwargs['id']
     if asst_id is None:
         print('Assistant id must be given as argument or in .env file')
         return
-    res = chatgpt.beta.assistants.retrieve(asst_id)
-    show_json(res)
+    bot = chatgpt.beta.assistants.retrieve(asst_id)
+    if is_debug:
+        show_json(bot)
+    print_asst(bot)
+
+
+def print_asst(bot):
+    """Print assistant details in own format"""
+    print(f"""  AsstId: {bot.id} | Created: {epoch_to_localtime(bot.created_at)}
+  Name: {bot.name} \t\t\t| Model: {bot.model}
+  Files: {bot.file_ids}
+  Tools: {bot.tools}
+  Instructions: {bot.instructions}""")
 
 
 @asst.command(name='list', help='List assistants linked with OpenAI platform account')
 def alist():
     """List assistants linked with the OpenAI platform account"""
     res = chatgpt.beta.assistants.list(order="desc", limit=20)
-    show_json(res)
+    if is_debug:
+        show_json(res)
+    for _, row in enumerate(res.data):
+        print_asst(row)
+        print('------------------------------------------------------------')
 
 
 @asst.command(name='checkfile', help='Check file paths and their size')

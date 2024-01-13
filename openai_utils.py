@@ -9,7 +9,7 @@ License: MIT
 import random
 import re
 import string
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def show_json(obj):
@@ -42,3 +42,8 @@ def bytes_to_human_readable(size_in_bytes):
 def str_to_bool(s):
     """Convert a string representation of truth to true (1), otherwise false (0)"""
     return str(s).lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup']
+
+
+def epoch_to_localtime(epoch):
+    """Convert epoch timestamp to localtime"""
+    return datetime.fromtimestamp(epoch, timezone.utc).astimezone().strftime("%d-%b-%Y %H:%M %Z")

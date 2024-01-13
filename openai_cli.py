@@ -24,6 +24,7 @@ License: MIT
 """
 import importlib
 import os
+import shutil
 import time
 from pprint import pprint
 
@@ -34,8 +35,8 @@ from openai import OpenAI
 from openai_utils import show_json, datetime_str, str_to_bool
 
 GPT_ENV = 'openai.env'
-dotenv.load_dotenv()
 dotenv.load_dotenv(GPT_ENV)
+dotenv.load_dotenv()
 chatgpt = OpenAI()
 # set DEBUG=True or DEBUG=1 in shell environment or .env file
 is_debug = str_to_bool(os.environ.get('DEBUG', default=False))
@@ -86,14 +87,15 @@ def chat(**kwargs):
         return new_chat(**kwargs)
 
     click.echo(message='Continuing chat conversation ', nl=False, color=True)
-    return chat_response(os.environ.get('GPT_THREAD'), kwargs['msg'], kwargs['asst'])
+    return chat_response(os.environ.get('GPT_THREAD'), kwargs['msg'], asst_id)
 
 
 def new_chat(**kwargs):
     """Create a new chat conversation thread in ChatGPT"""
     if os.path.exists(GPT_ENV):
-        # rename the GPT_ENV file before starting a new thread
-        os.rename(GPT_ENV, f'{GPT_ENV}.{datetime_str()}')
+        # Better keep backup copy of last GPT_ENV before starting a new thread
+        # rather than rename it
+        shutil.copy(GPT_ENV, f'{GPT_ENV}.{datetime_str()}')
     else:
         with open(GPT_ENV, 'w', encoding='utf-8') as file:
             file.close()
@@ -103,6 +105,8 @@ def new_chat(**kwargs):
     click.echo(message='New chat conversation ', nl=False, color=True)
     # Save the thread id to continue conversation
     dotenv.set_key(GPT_ENV, "GPT_THREAD", thread.id)
+    # Let's keep track of the asst in our own GPT_ENV
+    dotenv.set_key(GPT_ENV, "ASSISTANT_ID", kwargs['asst'])
     return chat_response(thread.id, kwargs['msg'], kwargs['asst'])
 
 
@@ -119,7 +123,6 @@ def chat_response(thread_id: str, msg: str, asst_id: str):
 
     # Run the Assistant in that thread with message already inserted
     run = chatgpt.beta.threads.runs.create(thread_id=thread_id, assistant_id=asst_id)
-    # dotenv.set_key(GPT_ENV, 'GPT_RUNID', run.id)
 
     # Check the Run status for completion
     run = wait_on_run(thread=thread_id, run=run)
@@ -137,7 +140,7 @@ def wait_on_run(run, thread):
     """Check open thread run status till completed or cancelled"""
     while run.status in ('queued', 'in_progress'):
         run = chatgpt.beta.threads.runs.retrieve(thread_id=thread, run_id=run.id)
-        time.sleep(os.environ.get('GPT_RUN_SLEEP', 3))
+        time.sleep(int(os.environ.get('GPT_RUN_SLEEP', 3)))
     return run
 
 
