@@ -25,7 +25,7 @@ from openai_utils import (show_json, bytes_to_human_readable,
 GPT_ENV = 'openai.env'
 # Sequence matters. GPT_ENV must be loaded first
 dotenv.load_dotenv(GPT_ENV)
-dotenv.load_dotenv()
+dotenv.load_dotenv(override=True)
 chatgpt = OpenAI()
 is_debug = str_to_bool(os.environ.get('DEBUG', default=False))
 __version__ = importlib.metadata.version("openai-cli")

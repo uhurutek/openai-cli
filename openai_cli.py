@@ -30,13 +30,14 @@ from pprint import pprint
 
 import click
 import dotenv
-from openai import OpenAI
+from openai import (APIConnectionError, APIError, APITimeoutError, AuthenticationError,
+                    BadRequestError, OpenAI, PermissionDeniedError, RateLimitError)
 
 from openai_utils import show_json, datetime_str, str_to_bool
 
 GPT_ENV = 'openai.env'
 dotenv.load_dotenv(GPT_ENV)
-dotenv.load_dotenv()
+dotenv.load_dotenv(override=False)
 chatgpt = OpenAI()
 # set DEBUG=True or DEBUG=1 in shell environment or .env file
 is_debug = str_to_bool(os.environ.get('DEBUG', default=False))
@@ -128,12 +129,42 @@ def chat_response(thread_id: str, msg: str, asst_id: str):
     run = wait_on_run(thread=thread_id, run=run)
 
     # Retrieve and display the ChatGPT assistant response
-    msgs = chatgpt.beta.threads.messages.list(thread_id=thread_id, order="asc", after=msg.id)
+    msgs = safe_msg_retrieve(thread_id, msg.id)
     if is_debug:
         show_json(msgs)
+    if msgs is None or not msgs.data:
+        return {}
     rs = {'ques': msg.content[0].text.value, 'answ': msgs.data[0].content[0].text.value}
     pprint(rs)
     return rs
+
+
+def safe_msg_retrieve(thread_id, msg_id):
+    """Safely call OpenAI API with error handling"""
+    try:
+        return chatgpt.beta.threads.messages.list(thread_id=thread_id, order="asc", after=msg_id)
+    except RateLimitError as e:
+        # Handle rate limit error, e.g. wait or log
+        print(f"OpenAI API request exceeded rate limit: {e}")
+    except BadRequestError as e:
+        # Handle invalid request error, e.g. validate parameters or log
+        print(f"OpenAI API request was invalid: {e}")
+    except AuthenticationError as e:
+        # Handle authentication error, e.g. check credentials or log
+        print(f"OpenAI API request was not authorized: {e}")
+    except PermissionDeniedError as e:
+        # Handle permission error, e.g. check scope or log
+        print(f"OpenAI API request was not permitted: {e}")
+    except APITimeoutError as e:
+        # Handle timeout error, e.g. retry or log
+        print(f"OpenAI API request timed out: {e}")
+    except APIConnectionError as e:
+        # Handle connection error, e.g. check network or log
+        print(f"OpenAI API request failed to connect: {e}")
+    except APIError as e:
+        # Handle API error, e.g. retry or log
+        print(f"OpenAI API returned an API Error: {e}")
+    return None
 
 
 def wait_on_run(run, thread):
