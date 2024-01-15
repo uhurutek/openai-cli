@@ -36,6 +36,7 @@ from openai import (APIConnectionError, APIError, APITimeoutError, Authenticatio
 from openai_utils import show_json, datetime_str, str_to_bool
 
 GPT_ENV = 'openai.env'
+ENV_BACKUP = '.env.backup'
 dotenv.load_dotenv(GPT_ENV)
 dotenv.load_dotenv(override=False)
 chatgpt = OpenAI()
@@ -95,8 +96,9 @@ def new_chat(**kwargs):
     """Create a new chat conversation thread in ChatGPT"""
     if os.path.exists(GPT_ENV):
         # Better keep backup copy of last GPT_ENV before starting a new thread
-        # rather than rename it
-        shutil.copy(GPT_ENV, f'{GPT_ENV}.{datetime_str()}')
+        if not os.path.exists(ENV_BACKUP):
+            os.makedirs(ENV_BACKUP)
+        shutil.copy(GPT_ENV, f'{ENV_BACKUP}/{GPT_ENV}.{datetime_str()}')
     else:
         with open(GPT_ENV, 'w', encoding='utf-8') as file:
             file.close()
